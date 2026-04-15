@@ -32,14 +32,15 @@
 | `X` | Vogal acentuada | **É** |
 | `V` | Vogal acentuada | **Ó** |
 
+Total: 12
+
 #### Consoantes
 
 | F-SAMPA | IPA | Exemplo |
 |---------|-----|---------|
 | `b` | /b/ | **b**ola |
-| `ch` | /ʃ/ | **ch**ave |
 | `d` | /d/ | **d**ado |
-| `dy` | /dʒ/ | **d**ia (variante) |
+| `dy` | /dʒ/ | **d**ia |
 | `f` | /f/ | **f**aca |
 | `g` | /ɡ/ | **g**ato |
 | `rr` | /h/ | ca**rr**o |
@@ -53,12 +54,25 @@
 | `p` | /p/ | **p**ato |
 | `r` | /ɾ/ | ca**r**o |
 | `s` | /s/ | **s**ala |
-| `sh` | /ʃ/ | (variante de `ch`) |
 | `t` | /t/ | **t**ato |
+| `ty` | /ʃ/ | **t**ia |
 | `v` | /v/ | **v**ida |
-| `w` | /w/ | ág**u**a |
-| `y` | /j/ | pa**i** |
+| `x` | /ʃ/ | **ch**ave |
 | `z` | /z/ | ca**s**a |
+
+Total: 20
+
+20*12 240 * 2 480
+VV 12 * 12 144 / 7 m 24 rec 6 c por linha
+480 + 24
+
+## Phonemizer
+
+WIP
+
+## Regras do phonemizer
+
+WIP
 
 ## Projeto
 
