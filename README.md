@@ -2,6 +2,10 @@
 
 **Fonética Simplificada para Síntese de Voz em Português Brasileiro utilizando o CVVX**
 
+<img width="921" height="535" alt="image" src="https://github.com/user-attachments/assets/5ffcd49a-c54b-4012-8535-abf0a206652a" />
+
+*VIICTOR CVVX Alpha v0, arte do voicebank feita por morip*
+
 ---
 
 ## Tabela Completa de Fonemas
