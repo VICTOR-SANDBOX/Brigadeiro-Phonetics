@@ -5,85 +5,99 @@ using OpenUtau.Core.G2p;
 
 namespace OpenUtau.Plugin.Builtin;
 
-[Phonemizer("Portuguese CVVX Phonemizer", "PT-BR CVVX", "Vento", "PT")]
+[Phonemizer("Portuguese CVVX Phonemizer", "PT-BR CVVX", "xiao", "PT")]
 public class PortugueseCVVXPhonemizer : SyllableBasedPhonemizer
 {
-	private class PhoneticG2p : IG2p
-	{
-		private readonly string[] validSymbols;
+    private class PortugueseCVVXG2p : IG2p
+    {
+        private readonly HashSet<string> vowels;
+        private readonly HashSet<string> symbols;
+        private readonly string[] validSymbols;
 
-		public PhoneticG2p(string[] validSymbols)
-		{
-			this.validSymbols = validSymbols.OrderByDescending((string s) => s.Length).ToArray();
-		}
+        public PortugueseCVVXG2p(string[] vowels, string[] consonants, Dictionary<string, string> replacements)
+        {
+            this.vowels = new HashSet<string>(vowels);
+            var allSymbols = vowels.Concat(consonants).Concat(replacements.Keys).Distinct();
+            this.symbols = new HashSet<string>(allSymbols);
+            this.validSymbols = allSymbols.OrderByDescending(s => s.Length).ToArray();
+        }
 
-		public bool IsValidSymbol(string symbol) => validSymbols.Contains(symbol);
+        public bool IsValidSymbol(string symbol)
+        {
+            return symbols.Contains(symbol);
+        }
 
-		public bool IsVowel(string symbol) => false;
+        public bool IsVowel(string symbol)
+        {
+            return vowels.Contains(symbol);
+        }
 
-		public bool IsGlide(string symbol) => false;
+        public bool IsGlide(string symbol)
+        {
+            return false;
+        }
 
-		public IList<string> Predict(string text) => Query(text);
+        public string[] Query(string text)
+        {
+            var phonemes = Split(text);
+            return phonemes ?? new string[0];
+        }
 
-		public string[] Query(string text)
-		{
-			if (string.IsNullOrEmpty(text))
-			{
-				return new string[0];
-			}
-            
-			List<string> list = new List<string>();
-			string text2 = text;
-            
-			while (text2.Length > 0)
-			{
-				bool matchFound = false;
-				foreach (string symbol in validSymbols)
-				{
-					if (text2.StartsWith(symbol))
-					{
-						list.Add(symbol);
-						text2 = text2.Substring(symbol.Length);
-						matchFound = true;
-						break;
-					}
-				}
-                
-				if (!matchFound)
-				{
-					text2 = text2.Substring(1);
-				}
-			}
-			return list.ToArray();
-		}
+        private string[] Split(string text)
+        {
+            List<string> result = new List<string>();
+            string remaining = text;
+            while (remaining.Length > 0)
+            {
+                bool found = false;
+                foreach (string symbol in validSymbols)
+                {
+                    if (remaining.StartsWith(symbol))
+                    {
+                        result.Add(symbol);
+                        remaining = remaining.Substring(symbol.Length);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    remaining = remaining.Substring(1);
+                }
+            }
+            return result.ToArray();
+        }
 
-		public string[] UnpackHint(string hint, char separator = ' ') => hint.Split(separator);
-	}
+        public string[] UnpackHint(string hint, char separator = ' ')
+        {
+            return hint.Split(separator);
+        }
+    }
 
 	private readonly string[] vowels = "a,e,i,o,u,@,7,1,0,Q,X,V".Split(",");
-	private readonly string[] consonants = "p,b,t,d,k,g,f,v,s,z,x,j,m,n,nh,l,lh,r,rr".Split(",");
+	private readonly string[] consonants = "p,b,t,d,k,g,f,v,s,z,x,j,m,n,nh,l,lh,r,rr,tch,dj".Split(",");
 	private readonly Dictionary<string, string> dictionaryReplacements = new Dictionary<string, string>();
 
 	public PortugueseCVVXPhonemizer()
 	{
 		var rawReplacements = new Dictionary<string, string[]>
 		{
-			{ "@", new[] { "an", "am", "A", "ã", "a~" } },
-			{ "7", new[] { "en", "em", "E", "ẽ", "e~" } },
-			{ "1", new[] { "in", "im", "I", "ĩ", "i~" } },
-			{ "0", new[] { "on", "om", "O", "õ", "o~" } },
-			{ "Q", new[] { "un", "um", "U", "ũ", "u~" } },
-			{ "X", new[] { "eh", "é" } },
-			{ "V", new[] { "oh", "ó" } },
-			{ "x", new[] { "ch", "sh", "S", "Ch", "tch", "tS", "T" } },
-            { "d", new[] { "dj", "dy", "dZ" } },
-            { "t", new[] { "ty" } },
-			{ "rr", new[] { "h", "rh" } },
-			{ "k", new[] { "q", "qu", "c" } },
-			{ "j", new[] { "zh", "Z", "jh" } },
-			{ "nh", new[] { "ñ", "J" } },
-            { "u", new[] { "w" } },
-            { "i", new[] { "y" } }
+			{ "@", new[] { "a~", "A", "6", "am", "an", "6~", "ã" } },
+			{ "7", new[] { "e~", "em", "en", "ẽ" } },
+			{ "1", new[] { "i~", "im", "in", "I", "ĩ" } },
+			{ "0", new[] { "o~", "om", "on", "õ" } },
+			{ "Q", new[] { "u~", "um", "un", "U", "ũ" } },
+			{ "X", new[] { "E", "3", "é", "e'" } },
+			{ "V", new[] { "O", "9", "ó", "o'" } },
+			{ "x", new[] { "S" } },
+			{ "tch", new[] { "tS" } },
+			{ "dj", new[] { "dZ" } },
+			{ "j", new[] { "Z" } },
+			{ "nh", new[] { "J" } },
+			{ "lh", new[] { "L" } },
+			{ "rr", new[] { "R", "X" } },
+			{ "u", new[] { "w", "w~" } },
+			{ "i", new[] { "j", "j~" } }
 		};
 
 		foreach (var kvp in rawReplacements)
@@ -105,7 +119,7 @@ public class PortugueseCVVXPhonemizer : SyllableBasedPhonemizer
 
 	protected override IG2p LoadBaseDictionary()
 	{
-		return new PhoneticG2p(vowels.Concat(consonants).Concat(dictionaryReplacements.Keys).ToArray());
+		return new PortugueseCVVXG2p(vowels, consonants, dictionaryReplacements);
 	}
 
 	protected override List<string> ProcessSyllable(Syllable syllable)
@@ -126,8 +140,19 @@ public class PortugueseCVVXPhonemizer : SyllableBasedPhonemizer
                 HandleVV(prevV, v, syllable.vowelTone, list);
 			}
 		}
-		else if (syllable.IsStartingCVWithOneConsonant || syllable.IsStartingCVWithMoreThanOneConsonant)
+		else if (syllable.IsStartingCVWithOneConsonant)
 		{
+            list.Add($"{cc.Last()}{v}");
+		}
+		else if (syllable.IsStartingCVWithMoreThanOneConsonant)
+		{
+			if (cc.Last() == "r" || cc.Last() == "l")
+			{
+				for (int i = 0; i < cc.Length - 1; i++)
+				{
+					list.Add($"{cc[i]}e");
+				}
+			}
             list.Add($"{cc.Last()}{v}");
 		}
 		else
@@ -140,34 +165,63 @@ public class PortugueseCVVXPhonemizer : SyllableBasedPhonemizer
 
     private void HandleVV(string prevV, string v, int tone, List<string> list)
     {
+        if (prevV == "i" && v != "i")
+        {
+            if (HasOto($"y{v}", tone))
+            {
+                list.Add($"y{v}");
+                return;
+            }
+        }
+
         string text = $"{prevV} {v}";
         if (HasOto(text, tone))
         {
             list.Add(text);
         }
-        else if (v == "u")
+        else if (v == "u" || v == "o")
         {
             list.Add($"{prevV} w");
         }
-        else if (v == "i")
+        else if (v == "i" || v == "e")
         {
             list.Add($"{prevV} y");
         }
         else
         {
-            list.Add(v); // fallback se n tiver VV
+            list.Add(v);
         }
     }
 
     private void HandleVC(string prevV, string[] cc, string v, int tone, List<string> list)
     {
-        string vc = $"{prevV} {cc[0]}";
+        string c = cc[0];
+        if (c == "dj")
+        {
+            c = "d";
+        }
+        if (c == "tch")
+        {
+            c = "t";
+        }
+        string vc = $"{prevV} {c}";
         if (HasOto(vc, tone))
         {
             list.Add(vc);
         }
 
         string cv = $"{cc.Last()}{v}";
+        if (cc.Length > 1 && (cc.Last() == "r" || cc.Last() == "l"))
+        {
+            for (int i = 0; i < cc.Length - 1; i++)
+            {
+                string ce = $"{cc[i]}e";
+                if (HasOto(ce, tone))
+                {
+                    list.Add(ce);
+                }
+            }
+        }
         list.Add(cv);
     }
 
@@ -177,7 +231,7 @@ public class PortugueseCVVXPhonemizer : SyllableBasedPhonemizer
 
 		if (ending.IsEndingV)
 		{
-            // Note that has no rest behind it, just sustain
+
             return list;
 		}
 
